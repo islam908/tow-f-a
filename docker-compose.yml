@@ -1,0 +1,49 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: otp_hub_app
+    restart: unless-stopped
+    ports:
+      - "8000:80"
+    environment:
+      - APP_ENV=production
+      - APP_DEBUG=false
+      - APP_URL=http://localhost:8000
+      - DB_CONNECTION=mysql
+      - DB_HOST=db
+      - DB_PORT=3306
+      - DB_DATABASE=otphub_db
+      - DB_USERNAME=root
+      - DB_PASSWORD=secretpassword
+      - MAIL_MAILER=smtp
+      - MAIL_HOST=mailpit
+      - MAIL_PORT=1025
+    depends_on:
+      - db
+    networks:
+      - otp_network
+
+  db:
+    image: mysql:8.0
+    container_name: otp_hub_db
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: otphub_db
+      MYSQL_ROOT_PASSWORD: secretpassword
+    ports:
+      - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+    networks:
+      - otp_network
+
+volumes:
+  db_data:
+
+networks:
+  otp_network:
+    driver: bridge
